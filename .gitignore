@@ -1,0 +1,11 @@
+*state
+build
+.env
+*privatekey
+out
+log
+.terraform
+*tfstate*
+keys
+*.auto.tfvars
+

@@ -1,0 +1,10 @@
+*.vhd
+*.img
+*state
+*backup
+*kernel
+*cmdline
+.terraform
+.git
+keys
+out
