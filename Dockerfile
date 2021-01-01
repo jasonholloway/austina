@@ -16,11 +16,7 @@ RUN wget \
   && chmod +x /usr/bin/linuxkit
 
 # more bits and bobs
-RUN apk add --no-cache qemu-img
-RUN apk add --no-cache gettext
+RUN apk add --no-cache qemu-img gettext make bash
 
-WORKDIR /build
-
-COPY ./src .
-COPY buildImage.sh .
+WORKDIR /w
 

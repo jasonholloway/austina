@@ -1,0 +1,65 @@
+kernel:
+  image: linuxkit/kernel:5.4.39
+  cmdline: "console=ttyS0 root=/dev/sda1"
+
+init:
+  - linuxkit/init:a68f9fa0c1d9dbfc9c23663749a0b7ac510cbe1c
+  - linuxkit/runc:v0.8
+  - linuxkit/containerd:a4aa19c608556f7d786852557c36136255220c1f
+
+onboot:
+  - name: sysctl
+    image: linuxkit/sysctl:v0.8
+  - name: rngd1
+    image: linuxkit/rngd:v0.8
+    command: ["/sbin/rngd", "-1"]
+  - name: dhcpcd1
+    image: linuxkit/dhcpcd:v0.7
+    command: ["/sbin/dhcpcd", "--nobackground", "-f", "/dhcpcd.conf", "-1"]
+    
+services:
+  - name: rngd
+    image: linuxkit/rngd:v0.8
+  - name: dhcpcd
+    image: linuxkit/dhcpcd:v0.8
+  - name: getty
+    image: linuxkit/getty:v0.8
+    env:
+     - INSECURE=true
+  - name: sshd
+    image: linuxkit/sshd:666b4a1a323140aa1f332826164afba506abf597
+    binds:
+     - /root/.ssh/authorized_keys:/root/.ssh/authorized_keys
+  - name: wg-lb
+    image: cirslis/wg-lb
+    net: host
+    binds:
+      # - /lib/wg0:/lib/wg0
+      - /etc/wireguard:/etc/wireguard
+    capabilities:
+      - CAP_NET_ADMIN
+      - CAP_NET_RAW
+     
+  # - name: wg0
+  #   image: linuxkit/ip:v0.7
+  #   net: host
+  #   binds:
+  #     # - /lib/wg0:/lib/wg0
+  #     - /etc/wireguard:/etc/wireguard
+  #   command: ["/lib/wg0/setupNet.sh"]
+
+files:
+  - path: root/.ssh/authorized_keys
+    source: id_rsa.pub
+    mode: "0600"
+  - path: etc/wireguard/wg0.conf
+    source: wg0.conf
+    mode: "0600"
+  # - path: lib/wg0/setupNet.sh
+  #   source: setupNet.sh
+  #   mode: "0700"
+
+trust:
+  org:
+    - linuxkit
+    - cirslis
