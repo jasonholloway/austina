@@ -36,3 +36,5 @@ RUN apk add --no-cache \
     wireguard-tools
 
 RUN apk add --no-cache bash vim
+
+COPY ./*sh ./

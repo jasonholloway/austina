@@ -1,0 +1,15 @@
+#!/bin/bash
+
+export TOPOLOGY="$(
+	gpg -d out/topology.gpg \
+	| awk '
+		$1 == "peer" && $2 > 0 {
+			print $1" "$2" "$3
+			next
+		}
+		{print}
+	'
+)"
+
+cat image/image.yml | envsubst
+

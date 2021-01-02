@@ -1,0 +1,45 @@
+#!/bin/bash
+
+
+main() {
+		data="$(genData)"
+		genHubConf
+}
+
+
+genData() {
+		for p in {0..3}; do
+				key=$(wg genkey)
+				pubkey=$(echo $key | wg pubkey)
+				echo "${p} ${key} ${pubkey} 10.0.1.${p}"
+				done
+}
+
+
+genHubConf() {
+		echo "$data" | awk '
+				 $1 == "0" {
+				 		print "[Interface]"
+						print "PrivateKey="$2
+						print "ListenPort=51820"
+						print ""
+						next
+				 }
+
+				 {
+						print "[Peer]"
+						print "PublicKey="$3
+						print "AllowedIPs="$4"/32"
+						print ""
+				 }
+		'
+}
+
+clientData() {
+		echo "$data" | grep -v hub
+}
+
+
+
+
+main
