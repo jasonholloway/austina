@@ -2,13 +2,23 @@
 
 hostIp=$(ip -o -4 addr list eth0 | awk '{print $4}' | cut -d/ -f1)
 
+cidr=10.10.10.0/24
+
+cat <<EOF > wg0.conf
+[Interface]
+PrivateKey = YCd6oH1ZYvTbDFpOVVWQShcyd6LKvmIeifmtIIWcC1c=
+ListenPort = 51820
+
+[Peer]
+PublicKey = B1Ph9cvLZH16rgKQASLIjAoDHRqCejVN+B9gTFi7bwo=
+AllowedIPs = ${cidr}
+
+EOF
+
 
 ip link add dev wg0 type wireguard
-
-ip addr add dev wg0 10.10.10.1/24
-
-/usr/bin/wg setconf wg0 /etc/wireguard/wg0.conf
-
+ip addr add dev wg0 ${cidr}
+wg setconf wg0 ${PWD}/wg0.conf
 ip link set dev wg0 up
 
 echo 1 > /proc/sys/net/ipv4/ip_forward

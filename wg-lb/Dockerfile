@@ -1,7 +1,30 @@
 FROM linuxkit/alpine:e2391e0b164c57db9f6c4ae110ee84f766edc430 AS mirror
-RUN mkdir -p /out/etc/apk && cp -r /etc/apk/* /out/etc/apk/
-RUN apk add curl
-RUN apk add --no-cache --initdb -p /out \
+#RUN mkdir -p /out/etc/apk && cp -r /etc/apk/* /out/etc/apk/
+#RUN apk add curl
+#RUN apk add --no-cache --initdb -p /out \
+#    alpine-baselayout \
+#    busybox \
+#    iproute2 \
+#    iptables \
+#    ebtables \
+#    ipvsadm \
+#    bridge-utils \
+#    musl \
+#    wireguard-tools
+#
+#RUN apk add --no-cache bash
+#
+#RUN rm -rf /out/etc/apk /out/lib/apk /out/var/cache
+#
+#FROM scratch
+#WORKDIR /
+#COPY --from=mirror /out/ /
+#COPY setupNet.sh ./
+#
+#ENTRYPOINT ['sh']
+#CMD ['./setupNet.sh']
+
+RUN apk add --no-cache \
     alpine-baselayout \
     busybox \
     iproute2 \
@@ -12,11 +35,4 @@ RUN apk add --no-cache --initdb -p /out \
     musl \
     wireguard-tools
 
-RUN rm -rf /out/etc/apk /out/lib/apk /out/var/cache
-
-FROM scratch
-ENTRYPOINT []
-CMD []
-WORKDIR /
-COPY --from=mirror /out/ /
-
+RUN apk add --no-cache bash vim

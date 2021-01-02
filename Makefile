@@ -30,20 +30,19 @@ out/:
 	mkdir -p out
 
 
-keys: keys/austina.pubkey keys/client.pubkey
+
+clients:=$(foreach i,1 2 3 4,client$(i))
+peers:=$(clients) austina
+
+keys: $(foreach p,$(peers),keys/$(p).key.gpg keys/$(p).pubkey)
 
 keys/:
 	mkdir -p keys
 
-keys/austina.key.gpg keys/austina.pubkey: keys/
+keys/%.key.gpg keys/%.pubkey: keys/
 	wg genkey \
-		| tee >(wg pubkey > keys/austina.pubkey) \
-		| gpg -c -o keys/austina.key.gpg
-
-keys/client.key.gpg keys/client.pubkey: keys/
-	wg genkey \
-		| tee >(wg pubkey > keys/client.pubkey) \
-		| gpg -c -o keys/client.key.gpg
+		| tee >(wg pubkey > keys/$*.pubkey) \
+		| gpg -c -o keys/$*.key.gpg
 
 
 deploy: deploy.tf
