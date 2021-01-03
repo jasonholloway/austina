@@ -1,16 +1,56 @@
-#!/bin/sh
+#!/bin/bash
+set -x
 
-iface=eth0
-hostIp=$(ip -o -4 addr list $iface | awk '{print $4}' | cut -d/ -f1)
+topology=${TOPOLOGY:?need to pass TOPOLOGY!}
 
-echo 1 > /proc/sys/net/ipv4/ip_forward
+main() {
+  iface=$(getInterface)
+  hostIp=$(getHostIp)
 
-ip link add dev wg0 type wireguard
-ip addr add dev wg0 ${cidr}
+  # ip link add dev wg0 type wireguard
 
-wg setconf wg0 wg0.conf
+  #below should be done in root somehow?
+  echo 1 > /proc/sys/net/ipv4/ip_forward
 
-ip link set dev wg0 up
+  applyTopology
 
-./balance.sh $iface $hostIp
+  ip link set dev wg0 up
 
+  ./lb.sh $iface $hostIp
+}
+
+getInterface() {
+  ip link \
+    | awk '$1 ~ /\d+:/ && /eth/ {print $2}' \
+    | cut -d@ -f1 \
+    | cut -d: -f1
+}
+
+getHostIp() {
+  ip -o -4 addr list $iface \
+  | awk '{print $4}' | cut -d/ -f1
+}
+
+applyTopology() {
+  echo "$topology" | awk '
+    /^listenPort/ {
+      system("wg set wg0 listen-port "$2)
+      next
+    }
+    /^ipPrefix/ { 
+      ipPrefix=$2 
+      system("ip addr add dev wg0 "ipPrefix".0/24")
+      next
+    }
+    /^peer 0/ {
+      system("bash -c \"wg set wg0 private-key <(echo "$4")\"")
+      next
+    }
+    /^peer/ {
+      system("wg set wg0 peer "$3)
+      system("wg set wg0 peer "$3" allowed-ips "ipPrefix"."$2"/32")
+    }
+  '
+}
+
+main
