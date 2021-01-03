@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 set -x
 
 topology=${TOPOLOGY:?need to pass TOPOLOGY!}

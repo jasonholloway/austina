@@ -1,7 +1,7 @@
 SHELL:=/bin/bash
 
 name:=austina
-version:=0.0.8
+version:=0.0.9
 
 img:=out/$(name)-bios.img
 vhd:=out/$(name)-$(version).vhd

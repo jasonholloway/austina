@@ -18,6 +18,7 @@ onboot:
     command: ["/sbin/dhcpcd", "--nobackground", "-f", "/dhcpcd.conf", "-1"]
   - name: wginit
     image: ${WGLB_ID}
+    command: ['/bin/sh', '-c', 'ip set dev wg0 up']
     net: new
     runtime:
       interfaces:
@@ -43,7 +44,7 @@ services:
   - name: lb
     image: ${WGLB_ID}
     capabilities: [all]
-    command: ['/setupNet.sh']
+    command: ['/bin/sh', '-c', '/setupNet.sh']
     env: ['TOPOLOGY=${TOPOLOGY}']
     net: /run/netns/wg
 
