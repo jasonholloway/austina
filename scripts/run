@@ -5,7 +5,7 @@ cd out
 
 linuxkit run qemu \
 	-networking bridge,virbr0 \
-	austina-0.0.9.vhd
+	austina-0.0.10.vhd
 
 	# -publish 2022:22/tcp \
 	# -publish 51820:51820/udp \

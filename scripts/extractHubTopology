@@ -2,9 +2,10 @@
 
 gpg -d out/topology.gpg \
 | awk '
-	$1 == "peer" && $2 > 0 {
+	$1 == "peer" && $2 > 1 {
 		print $1" "$2" "$3
 		next
 	}
 	{print}
-'
+' \
+| base64 -w0

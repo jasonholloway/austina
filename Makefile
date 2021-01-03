@@ -1,7 +1,7 @@
 SHELL:=/bin/bash
 
 name:=austina
-version:=0.0.9
+version:=0.0.10
 
 img:=out/$(name)-bios.img
 vhd:=out/$(name)-$(version).vhd
@@ -17,7 +17,7 @@ $(img): export TOPOLOGY=$(shell scripts/extractHubTopology)
 $(img): export WGLB_ID=$(shell cat out/wg-lb.id)
 $(img): $(shell find image) out/wg-lb.id out/topology.gpg
 	cd image && \
-		DEBUG=1 linuxkit build \
+		linuxkit build \
 			-format raw-bios \
 			-disable-content-trust \
 			-dir ../out \
@@ -35,6 +35,7 @@ out/:
 
 
 out/topology.gpg: scripts/genTopology vars/ipPrefix vars/proxyUrl vars/listenPort
+	mkdir -p out
 	echo "will regenerate all keys etc - press return to continue..." && read _
 	scripts/genTopology
 

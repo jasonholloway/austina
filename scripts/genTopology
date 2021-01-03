@@ -8,7 +8,7 @@ genData() {
   echo "proxyUrl $(<vars/proxyUrl)"
   echo "listenPort $(<vars/listenPort)"
   echo "ipPrefix $(<vars/ipPrefix)"
-  for p in {0..3}; do
+  for p in {1..4}; do
     key=$(wg genkey)
     pubkey=$(echo $key | wg pubkey)
     echo "peer ${p} ${pubkey} ${key}"

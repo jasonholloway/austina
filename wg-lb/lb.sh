@@ -1,8 +1,5 @@
 #!/bin/bash
 
-if=${1:-eth0}
-hostIp=${2:-0.0.0.0}
-
 main() {
   readEndpoints \
   | uniq \
@@ -11,9 +8,9 @@ main() {
 
 readEndpoints() {
   while sleep 0.5s; do
-    wg | awk '
+    wg | gawk '
       /allowed ips:/ { 
-        match($2, /^(.+)\//, ip) 
+        match($3, /^(.+)\//, ip) 
       }
       /handshake:/ { 
         match($0, /([0-9]+) minutes/, min)
@@ -30,6 +27,9 @@ uniq() {
 setupRules() {
   while read ips; do
     ./clean.sh
+
+    iface=$(getInterface)
+    hostIp=$(getHostIp $iface)
       
     c=$(echo $ips | wc -w)
     i=0
@@ -52,7 +52,7 @@ forward() {
   iptables \
     -t nat \
     -A PREROUTING \
-    -i $if \
+    -i $iface \
     -p tcp \
     -d $hostIp \
     ! --dport 22 \
@@ -71,6 +71,18 @@ masquerade() {
     ! --dport 22 \
     -j MASQUERADE \
     -m comment --comment ZZZ
+}
+
+getInterface() {
+  ip link \
+    | gawk '$1 ~ /^[0-9]+:/ && /eth/ {print $2}' \
+    | cut -d@ -f1 \
+    | cut -d: -f1
+}
+
+getHostIp() {
+  ip -o -4 addr list $iface \
+  | awk '{print $4}' | cut -d/ -f1
 }
 
 main $@

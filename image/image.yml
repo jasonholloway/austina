@@ -16,17 +16,12 @@ onboot:
   - name: dhcpcd1
     image: linuxkit/dhcpcd:v0.8
     command: ["/sbin/dhcpcd", "--nobackground", "-f", "/dhcpcd.conf", "-1"]
-  - name: wginit
+  - name: wg
     image: ${WGLB_ID}
-    command: ['/bin/sh', '-c', 'ip set dev wg0 up']
-    net: new
-    runtime:
-      interfaces:
-        - name: wg0
-          add: wireguard
-          createInRoot: true
-      bindNS:
-        net: /run/netns/wg
+    capabilities: [all]
+    net: host
+    command: ['/setupNet.sh']
+    env: ['TOPOLOGY=${TOPOLOGY}']
     
 services:
   - name: rngd
@@ -44,9 +39,8 @@ services:
   - name: lb
     image: ${WGLB_ID}
     capabilities: [all]
-    command: ['/bin/sh', '-c', '/setupNet.sh']
-    env: ['TOPOLOGY=${TOPOLOGY}']
-    net: /run/netns/wg
+    net: host
+    command: ['/lb.sh']
 
 files:
   - path: root/.ssh/authorized_keys
