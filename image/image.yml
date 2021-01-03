@@ -3,9 +3,9 @@ kernel:
   cmdline: "console=ttyS0 root=/dev/sda1"
 
 init:
-  - linuxkit/init:a68f9fa0c1d9dbfc9c23663749a0b7ac510cbe1c
+  - linuxkit/init:v0.8
   - linuxkit/runc:v0.8
-  - linuxkit/containerd:a4aa19c608556f7d786852557c36136255220c1f
+  - linuxkit/containerd:v0.8
 
 onboot:
   - name: sysctl
@@ -33,7 +33,7 @@ services:
     env:
      - INSECURE=true
   - name: sshd
-    image: linuxkit/sshd:666b4a1a323140aa1f332826164afba506abf597
+    image: linuxkit/sshd:v0.8
     binds:
      - /root/.ssh/authorized_keys:/root/.ssh/authorized_keys
   - name: lb

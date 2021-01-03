@@ -27,19 +27,3 @@ COPY *.sh ./
 
 ENTRYPOINT []
 CMD []
-
-# RUN apk add --no-cache \
-#     alpine-baselayout \
-#     busybox \
-#     iproute2 \
-#     iptables \
-#     ebtables \
-#     ipvsadm \
-#     bridge-utils \
-#     musl \
-#     wireguard-tools
-
-# RUN apk add --no-cache bash vim
-# RUN apk add --no-cache coreutils
-
-# COPY ./* ./
