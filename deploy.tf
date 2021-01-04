@@ -1,5 +1,13 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+      version = "=2.41.0"
+    }
+  }
+}
+
 provider "azurerm" {
-  version = "=2.41.0"
   features {}
 }
 
@@ -20,7 +28,7 @@ data "azurerm_storage_container" "vhds" {
 }
 
 
-variable "tag" { type = "string" }
+variable "tag" { type = string }
 
 locals {
   rg = data.azurerm_resource_group.cirslis.name

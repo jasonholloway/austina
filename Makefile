@@ -1,7 +1,7 @@
 SHELL:=/bin/bash
 
 name:=austina
-version:=0.0.11
+version:=0.0.12
 
 img:=out/$(name)-bios.img
 vhd:=out/$(name)-$(version).vhd
@@ -41,15 +41,20 @@ out/topology.gpg: scripts/genTopology vars/ipPrefix vars/proxyUrl vars/listenPor
 
 
 deploy: deploy.tf
-	terraform apply -var "tag=$(version)"
+	cat out/terraform.tfstate.gpg | gpg -d > terraform.tfstate
+	terraform apply \
+		-var "tag=$(version)"
+	cat terraform.tfstate | gpg -c > out/terraform.tfstate.gpg
 
-runQemu: scripts/run
-	scripts/run
 
 runDocker: out/wg-lb.id out/topology.gpg
 	docker run -it --rm --privileged \
 		-e TOPOLOGY="$$(cat out/topology.gpg | gpg -d | base64 -w0)" \
 		$$(<out/wg-lb.id) bash
+
+runQemu: scripts/run
+	scripts/run
+
 
 clean:
 	rm -rf out

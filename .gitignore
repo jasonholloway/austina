@@ -1,12 +1,10 @@
-*state
-build
-.env
-*privatekey
-out
-log
 .terraform
-*tfstate*
-keys
+*.tfstate
 *.auto.tfvars
+*.backup
+*.hcl
+
+out
 !out/topology.gpg
+!out/terraform.tfstate.gpg
 
