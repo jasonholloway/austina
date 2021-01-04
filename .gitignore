@@ -8,4 +8,5 @@ log
 *tfstate*
 keys
 *.auto.tfvars
+!out/topology.gpg
 
