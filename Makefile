@@ -43,8 +43,13 @@ out/topology.gpg: scripts/genTopology vars/ipPrefix vars/proxyUrl vars/listenPor
 deploy: deploy.tf
 	terraform apply -var "tag=$(version)"
 
-run: scripts/run
+runQemu: scripts/run
 	scripts/run
+
+runDocker: out/wg-lb.id out/topology.gpg
+	docker run -it --rm --privileged \
+		-e TOPOLOGY="$$(cat out/topology.gpg | gpg -d | base64 -w0)" \
+		$$(<out/wg-lb.id) bash
 
 clean:
 	rm -rf out

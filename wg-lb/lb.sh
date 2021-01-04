@@ -1,5 +1,8 @@
 #!/bin/bash
 
+sshPort=${1:-22}
+wgPort=${2:-49991}
+
 main() {
   readEndpoints \
   | uniq \
@@ -30,6 +33,8 @@ setupRules() {
 
     iface=$(getInterface)
     hostIp=$(getHostIp $iface)
+    udpPorts="$(getLocalUdpPorts)"
+    tcpPorts="$(getLocalTcpPorts)"
       
     c=$(echo $ips | wc -w)
     i=0
@@ -53,22 +58,41 @@ forward() {
     -t nat \
     -A PREROUTING \
     -i $iface \
-    -p tcp \
     -d $hostIp \
-    ! --dport 22 \
+    -p tcp \
+    -m tcp \
+      $(excludePorts "$tcpPorts") \
+    -m state \
+      --state NEW \
+    -m statistic \
+      --mode nth --every $((c-i)) --packet 0 \
+    -m comment \
+      --comment ZZZ \
     -j DNAT \
-    --to-destination $ip \
-    -m state --state NEW \
-    -m statistic --mode nth --every $c --packet $i \
-    -m comment --comment ZZZ
+      --to-destination $ip
+
+  iptables \
+    -t nat \
+    -A PREROUTING \
+    -i $iface \
+    -d $hostIp \
+    -p udp \
+    -m udp \
+      $(excludePorts "$udpPorts") \
+    -m state \
+      --state NEW \
+    -m statistic \
+      --mode nth --every $((c-i)) --packet 0 \
+    -m comment \
+      --comment ZZZ \
+    -j DNAT \
+      --to-destination $ip
 }
 
 masquerade() {
   iptables \
     -t nat \
     -A POSTROUTING \
-    -p tcp \
-    ! --dport 22 \
     -j MASQUERADE \
     -m comment --comment ZZZ
 }
@@ -84,5 +108,25 @@ getHostIp() {
   ip -o -4 addr list $iface \
   | awk '{print $4}' | cut -d/ -f1
 }
+
+getLocalUdpPorts() {
+  netstat -au \
+  | gawk '/^udp/ {match($4, /:([0-9]+)$/, p); print p[1]}' \
+  | sort \
+  | uniq
+}
+
+getLocalTcpPorts() {
+  netstat -at \
+  | gawk '/^tcp/ {match($4, /:([0-9]+)$/, p); print p[1]}' \
+  | sort \
+  | uniq
+}
+
+excludePorts() {
+  ports="$1" 
+  echo "$ports" | xargs -r echo "! --dport"
+}
+
 
 main $@
